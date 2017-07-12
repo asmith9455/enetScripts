@@ -70,16 +70,19 @@ if __name__ == '__main__':
     cap = cv2.VideoCapture(videoPath)
 
     pos_frame = cap.get(cv2.cv.CV_CAP_PROP_POS_FRAMES)
-    frameskip = 30
+    frameskip = 100
+    framectr = 0
+    print "frameskip is " + str(frameskip) 
     while True:
 	
 	startTime = int(round(time.time()*1000))
 	flag, frame = cap.read()
+	framectr += 1
 	if flag:
 	    # The frame is ready and already captured
 	    cv2.imshow('video', frame)
 	    pos_frame = cap.get(cv2.cv.CV_CAP_PROP_POS_FRAMES)
-	    print str(pos_frame)+" frames"
+	    
 	else:
 	    # The next frame is not ready, so we try to read it again
 	    cap.set(cv2.cv.CV_CAP_PROP_POS_FRAMES, pos_frame-1)
@@ -98,11 +101,13 @@ if __name__ == '__main__':
 
 	endTime = int(round(time.time()*1000))
 
-	print "image capture time is: " + str(endTime- startTime) + "ms"
+	
 
-	frameskip += 1
-	if (frameskip % 10 != 0):
+	framectr += 1
+	if (framectr % frameskip != 0):
 		continue
+	print str(pos_frame)+" frames"
+	print "image capture time is: " + str(endTime- startTime) + "ms"
 	
 	startTime = int(round(time.time()*1000))
 
@@ -112,9 +117,14 @@ if __name__ == '__main__':
 	input_image = input_image.transpose((2, 0, 1))
 	input_image = np.asarray([input_image])
 
-	out = net.forward_all(**{net.inputs[0]: input_image})
 
+        startTime2 = int(round(time.time()*1000))
+	out = net.forward_all(**{net.inputs[0]: input_image})
+	endTime2 = int(round(time.time()*1000))
 	prediction = net.blobs['deconv6_0_0'].data[0].argmax(axis=0)
+	endTime3 = int(round(time.time()*1000))
+        
+
 
 	prediction = np.squeeze(prediction)
 	prediction = np.resize(prediction, (3, input_shape[2], input_shape[3]))
@@ -126,6 +136,8 @@ if __name__ == '__main__':
 
 	endTime = int(round(time.time()*1000))
 	print "processing time is: " + str(endTime- startTime) + "ms"
+	print "of this, nn fwd propagation time is: " + str(endTime2- startTime2) + "ms"
+	print "of this, nn data rearrangement is: " + str(endTime3- endTime2) + "ms"
 
 
 	startTime = int(round(time.time()*1000))
