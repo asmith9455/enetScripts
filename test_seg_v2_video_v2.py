@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-This script visualize the semantic segmentation of ENet.
+This script visualize the semantic segmentation of ENet. - currently works on the TX1 at about 3 fps on the gpu for an input image of size 640x360
 """
 import os
 import numpy as np
